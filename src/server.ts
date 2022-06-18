@@ -31,17 +31,21 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   app.get('/filteredimage', async (req: Request, res: Response) => {
     const {image_url} = req.query;
+    // const {image_url} : {image_url: string} = req.query;
     if (!image_url) {
       return res.status(422).send('Please ensure image url is provided');
     }
 
     try {
-      const filteredpath = await filterImageFromURL(image_url);
-      res.sendFile(filteredpath);
-
-      setTimeout(() => {
+      const filteredpath = await filterImageFromURL(image_url as string);
+      res.sendFile(filteredpath, err => {
+        if (err) {
+          console.log(err);
+          res.status(500).send('Error could not send image');
+        }
         deleteLocalFiles([filteredpath]);
-      }, 1000);
+      });
+
     } catch (error) {
       console.log(error);
         res.status(422).send('Sorry, error in the process of filtering the image');
